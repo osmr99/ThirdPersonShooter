@@ -1,9 +1,15 @@
+using Unity.Cinemachine;
+using UnityEditor.UIElements;
 using UnityEngine;
 
 public class PlayerShoot : MonoBehaviour
 {
     Tps_Inputs tpsInput;
     PlayerMove playerMove;
+
+    [Header("Projectiles Effects")]
+    public Rigidbody bulletTrail;
+    public GameObject bulletDecal;
 
     [Header("Spawn Points")]
     public Transform gunSpawnPoint;
@@ -69,6 +75,12 @@ public class PlayerShoot : MonoBehaviour
 
     void FirePistol()
     {
+        SoundManager.Instance.PlaySound2D("PistolFire");
+        Rigidbody _trail;
+        _trail = Instantiate(bulletTrail, gunSpawnPoint.position,
+            gunSpawnPoint.rotation) as Rigidbody;
+        _trail.AddForce(gunSpawnPoint.forward * 300, ForceMode.Impulse);
+
         if(Physics.Raycast(gunSpawnPoint.position, gunSpawnPoint.forward, 
             out RaycastHit hit, pistolDistance))
         {
@@ -79,5 +91,10 @@ public class PlayerShoot : MonoBehaviour
     void WeaponHit(RaycastHit hit)
     {
         Debug.Log("You just hit " + hit.collider.name);
+
+        if(hit.transform.gameObject.tag == "ground")
+        {
+            Instantiate(bulletDecal, hit.point, Quaternion.LookRotation(hit.normal));
+        }
     }
 }

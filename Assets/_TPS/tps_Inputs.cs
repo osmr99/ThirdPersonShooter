@@ -227,7 +227,7 @@ public partial class @Tps_Inputs: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""df465b6c-d189-461a-a42f-d20c6b979790"",
-                    ""path"": ""<Keyboard>/e"",
+                    ""path"": ""<Mouse>/middleButton"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": "";KBM"",

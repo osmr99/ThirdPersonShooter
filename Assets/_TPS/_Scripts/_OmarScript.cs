@@ -9,9 +9,12 @@ public class _OmarScript : MonoBehaviour
         if(Keyboard.current.escapeKey.wasPressedThisFrame)
             EditorApplication.ExitPlaymode();
 
-        if (Keyboard.current.leftAltKey.isPressed)
-            Cursor.lockState = CursorLockMode.None;
-        else
-            Cursor.lockState = CursorLockMode.Locked;
+        if (Keyboard.current.qKey.wasPressedThisFrame)
+            EditorApplication.isPaused = !EditorApplication.isPaused;
+
+        //if (Keyboard.current.leftAltKey.isPressed)
+            //Cursor.lockState = CursorLockMode.None;
+        //else
+            //Cursor.lockState = CursorLockMode.Locked;
     }
 }

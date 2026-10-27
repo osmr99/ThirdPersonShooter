@@ -7,10 +7,10 @@ public class SoundManager : MonoBehaviour
     [SerializeField]
     private SoundLibrary sfxLibrary;
     [SerializeField]
-    public AudioSource sfx2DSource;
+    public AudioSource sfxSource;
 
-    public AudioSource masterAudioSource;
-    public AudioSource musicAudioSource;
+    //public AudioSource masterAudioSource;
+    //public AudioSource musicAudioSource;
 
     private void Awake()
     {
@@ -24,7 +24,7 @@ public class SoundManager : MonoBehaviour
             DontDestroyOnLoad(gameObject);
         }
 
-        sfx2DSource = GetComponentInChildren<AudioSource>();
+        sfxSource = GetComponentInChildren<AudioSource>();
     }
 
     public void PlaySound3D(AudioClip clip, Vector3 pos, float vol)
@@ -42,6 +42,6 @@ public class SoundManager : MonoBehaviour
 
     public void PlaySound2D(string soundName)
     {
-        sfx2DSource.PlayOneShot(sfxLibrary.GetClipFromName(soundName));
+        sfxSource.PlayOneShot(sfxLibrary.GetClipFromName(soundName));
     }
 }
