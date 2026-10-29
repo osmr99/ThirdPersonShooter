@@ -75,6 +75,8 @@ public class PlayerMove : MonoBehaviour
             isCrouching = !isCrouching;
 
         isAiming = tpsInputs.Player.Aim.IsPressed();
+        if (isAiming) _anim.SetLayerWeight(1, 1);
+        else _anim.SetLayerWeight(1, 0);
 
         HandleInput();
         HandleMovement();

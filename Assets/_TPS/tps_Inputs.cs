@@ -89,6 +89,33 @@ public partial class @Tps_Inputs: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Weapon1"",
+                    ""type"": ""Button"",
+                    ""id"": ""068acfe4-c684-43c4-9c16-0b38204379b9"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Weapon2"",
+                    ""type"": ""Button"",
+                    ""id"": ""e9b53b57-742d-4350-b1a6-054b3a60289e"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Weapon3"",
+                    ""type"": ""Button"",
+                    ""id"": ""e8d3f341-522c-4930-8d48-8bf8686395dc"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -289,6 +316,72 @@ public partial class @Tps_Inputs: IInputActionCollection2, IDisposable
                     ""action"": ""Crouch"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""06c4ad64-55fb-49c9-8cbe-0d7702b5bc39"",
+                    ""path"": ""<Keyboard>/1"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";KBM"",
+                    ""action"": ""Weapon1"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""eeb9eb0b-93fb-4f57-9f69-6ccec65d2d5d"",
+                    ""path"": ""<Gamepad>/dpad/left"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Gamepad"",
+                    ""action"": ""Weapon1"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""5c4a6c90-57a4-4718-a8e7-41976a15784e"",
+                    ""path"": ""<Keyboard>/2"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";KBM"",
+                    ""action"": ""Weapon2"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""8a530ae8-dc26-4b2a-9350-04dac9c2db29"",
+                    ""path"": ""<Gamepad>/dpad/up"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Gamepad"",
+                    ""action"": ""Weapon2"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""58fdb4a9-da83-4122-8bcc-a86ac327b49c"",
+                    ""path"": ""<Keyboard>/3"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";KBM"",
+                    ""action"": ""Weapon3"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""b6926ffa-46fc-4586-82a5-dd3ae8e4a5c6"",
+                    ""path"": ""<Gamepad>/dpad/right"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Gamepad"",
+                    ""action"": ""Weapon3"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -332,6 +425,9 @@ public partial class @Tps_Inputs: IInputActionCollection2, IDisposable
         m_Player_ShoulderSwitch = m_Player.FindAction("ShoulderSwitch", throwIfNotFound: true);
         m_Player_Run = m_Player.FindAction("Run", throwIfNotFound: true);
         m_Player_Crouch = m_Player.FindAction("Crouch", throwIfNotFound: true);
+        m_Player_Weapon1 = m_Player.FindAction("Weapon1", throwIfNotFound: true);
+        m_Player_Weapon2 = m_Player.FindAction("Weapon2", throwIfNotFound: true);
+        m_Player_Weapon3 = m_Player.FindAction("Weapon3", throwIfNotFound: true);
     }
 
     ~@Tps_Inputs()
@@ -405,6 +501,9 @@ public partial class @Tps_Inputs: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_ShoulderSwitch;
     private readonly InputAction m_Player_Run;
     private readonly InputAction m_Player_Crouch;
+    private readonly InputAction m_Player_Weapon1;
+    private readonly InputAction m_Player_Weapon2;
+    private readonly InputAction m_Player_Weapon3;
     public struct PlayerActions
     {
         private @Tps_Inputs m_Wrapper;
@@ -416,6 +515,9 @@ public partial class @Tps_Inputs: IInputActionCollection2, IDisposable
         public InputAction @ShoulderSwitch => m_Wrapper.m_Player_ShoulderSwitch;
         public InputAction @Run => m_Wrapper.m_Player_Run;
         public InputAction @Crouch => m_Wrapper.m_Player_Crouch;
+        public InputAction @Weapon1 => m_Wrapper.m_Player_Weapon1;
+        public InputAction @Weapon2 => m_Wrapper.m_Player_Weapon2;
+        public InputAction @Weapon3 => m_Wrapper.m_Player_Weapon3;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -446,6 +548,15 @@ public partial class @Tps_Inputs: IInputActionCollection2, IDisposable
             @Crouch.started += instance.OnCrouch;
             @Crouch.performed += instance.OnCrouch;
             @Crouch.canceled += instance.OnCrouch;
+            @Weapon1.started += instance.OnWeapon1;
+            @Weapon1.performed += instance.OnWeapon1;
+            @Weapon1.canceled += instance.OnWeapon1;
+            @Weapon2.started += instance.OnWeapon2;
+            @Weapon2.performed += instance.OnWeapon2;
+            @Weapon2.canceled += instance.OnWeapon2;
+            @Weapon3.started += instance.OnWeapon3;
+            @Weapon3.performed += instance.OnWeapon3;
+            @Weapon3.canceled += instance.OnWeapon3;
         }
 
         private void UnregisterCallbacks(IPlayerActions instance)
@@ -471,6 +582,15 @@ public partial class @Tps_Inputs: IInputActionCollection2, IDisposable
             @Crouch.started -= instance.OnCrouch;
             @Crouch.performed -= instance.OnCrouch;
             @Crouch.canceled -= instance.OnCrouch;
+            @Weapon1.started -= instance.OnWeapon1;
+            @Weapon1.performed -= instance.OnWeapon1;
+            @Weapon1.canceled -= instance.OnWeapon1;
+            @Weapon2.started -= instance.OnWeapon2;
+            @Weapon2.performed -= instance.OnWeapon2;
+            @Weapon2.canceled -= instance.OnWeapon2;
+            @Weapon3.started -= instance.OnWeapon3;
+            @Weapon3.performed -= instance.OnWeapon3;
+            @Weapon3.canceled -= instance.OnWeapon3;
         }
 
         public void RemoveCallbacks(IPlayerActions instance)
@@ -515,5 +635,8 @@ public partial class @Tps_Inputs: IInputActionCollection2, IDisposable
         void OnShoulderSwitch(InputAction.CallbackContext context);
         void OnRun(InputAction.CallbackContext context);
         void OnCrouch(InputAction.CallbackContext context);
+        void OnWeapon1(InputAction.CallbackContext context);
+        void OnWeapon2(InputAction.CallbackContext context);
+        void OnWeapon3(InputAction.CallbackContext context);
     }
 }
