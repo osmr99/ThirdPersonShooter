@@ -1,5 +1,3 @@
-using UnityEditor.UIElements;
-using Unity.UI;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -7,6 +5,7 @@ public class PlayerShoot : MonoBehaviour
 {
     Tps_Inputs tpsInput;
     PlayerMove playerMove;
+    [SerializeField] Animator anim;
 
     [Header("Set Weapon Type")]
     public int weaponID = 1;
@@ -14,7 +13,7 @@ public class PlayerShoot : MonoBehaviour
     [Header("HUD Elements")]
     public GameObject aimPanel;
     public GameObject scopePanel;
-    public Image crosshair; // why is it not on the Unity editor...? (if I fix this, put here the Image_Crosshair gameObject)
+    public Image crosshair; // why is it not on the Unity editor...? (if I fix this, put here the Image_Crosshair gameObject) (It appears the type Image cannot appear in the editor, why...?)
     public Sprite pistolCrossHair;
     public Sprite shotgunCrossHair;
 
@@ -25,6 +24,9 @@ public class PlayerShoot : MonoBehaviour
 
     [Header("Spawn Points")]
     public Transform gunSpawnPoint;
+    public Transform pistolSpawn;
+    public Transform shotgunSpawn;
+    public Transform rifleSpawn;
     public Transform aimDebugObject;
 
     [Header("Damage")]
@@ -66,6 +68,7 @@ public class PlayerShoot : MonoBehaviour
     {
         tpsInput = new Tps_Inputs();
         playerMove = GetComponent<PlayerMove>();
+        anim = GetComponent<Animator>();
     }
 
     private void OnEnable() => tpsInput.Enable();
@@ -75,6 +78,7 @@ public class PlayerShoot : MonoBehaviour
     private void Update()
     {
         aimPanel.SetActive(playerMove.isAiming ? true : false);
+        scopePanel.SetActive(playerMove.isAiming && playerMove.isScoped? true : false);
 
         if (gunCoolDown > 0) gunCoolDown -= Time.deltaTime;
         else gunCoolDown = 0;
@@ -114,18 +118,22 @@ public class PlayerShoot : MonoBehaviour
         {
             aimDebugObject.position = rayCastHit.point;
             gunSpawnPoint.LookAt(rayCastHit.point);
+            pistolSpawn.LookAt(rayCastHit.point);
+            rifleSpawn.LookAt(rayCastHit.point);
+            shotgunSpawn.LookAt(rayCastHit.point);
         }
     }
 
     void FirePistol()
     {
         SoundManager.Instance.PlaySound2D("PistolFire");
+        anim.SetTrigger("Pistol");
         Rigidbody _trail;
-        _trail = Instantiate(bulletTrail, gunSpawnPoint.position,
-            gunSpawnPoint.rotation) as Rigidbody;
-        _trail.AddForce(gunSpawnPoint.forward * 300, ForceMode.Impulse);
+        _trail = Instantiate(bulletTrail, pistolSpawn.position,
+            pistolSpawn.rotation) as Rigidbody;
+        _trail.AddForce(pistolSpawn.forward * 300, ForceMode.Impulse);
 
-        if(Physics.Raycast(gunSpawnPoint.position, gunSpawnPoint.forward, 
+        if(Physics.Raycast(pistolSpawn.position, pistolSpawn.forward, 
             out RaycastHit hit, pistolDistance))
         {
             WeaponHit(hit);
@@ -135,13 +143,13 @@ public class PlayerShoot : MonoBehaviour
     void FireRifle()
     {
         SoundManager.Instance.PlaySound2D("Rifle");
-
+        
         Rigidbody _trail;
-        _trail = Instantiate(bulletTrail, gunSpawnPoint.position,
-            gunSpawnPoint.rotation) as Rigidbody;
-        _trail.AddForce(gunSpawnPoint.forward * 300, ForceMode.Impulse);
+        _trail = Instantiate(bulletTrail, rifleSpawn.position,
+            rifleSpawn.rotation) as Rigidbody;
+        _trail.AddForce(rifleSpawn.forward * 300, ForceMode.Impulse);
 
-        if (Physics.Raycast(gunSpawnPoint.position, gunSpawnPoint.forward,
+        if (Physics.Raycast(rifleSpawn.position, rifleSpawn.forward,
             out RaycastHit hit, pistolDistance))
         {
             WeaponHit(hit);
@@ -153,12 +161,12 @@ public class PlayerShoot : MonoBehaviour
         SoundManager.Instance.PlaySound2D("ShotGun");
         for(int i = 0; i < shotAmount; i++)
         {
+            Vector3 shotAngle = GetShotDirection();
             Rigidbody _trail;
             _trail = Instantiate(bulletTrail, gunSpawnPoint.position,
                 gunSpawnPoint.rotation) as Rigidbody;
-            _trail.AddForce(gunSpawnPoint.forward * 300, ForceMode.Impulse);
-
-            if (Physics.Raycast(gunSpawnPoint.position, GetShotDirection(),
+            _trail.AddForce(shotAngle * 300, ForceMode.Impulse);
+            if (Physics.Raycast(gunSpawnPoint.position, shotAngle,
                 out RaycastHit hit, pistolDistance))
             {
                 WeaponHit(hit);

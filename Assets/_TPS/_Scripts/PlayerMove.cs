@@ -3,6 +3,7 @@ using Unity.Cinemachine;
 
 public class PlayerMove : MonoBehaviour
 {
+    PlayerShoot playerShoot;
     Tps_Inputs tpsInputs;
     CharacterController cc;
     Animator _anim;
@@ -46,6 +47,7 @@ public class PlayerMove : MonoBehaviour
 
     private void Awake()
     {
+        playerShoot = GetComponent<PlayerShoot>();
         tpsInputs = new Tps_Inputs();
         cc = GetComponent<CharacterController>();
         _anim = GetComponent<Animator>();
@@ -128,8 +130,10 @@ public class PlayerMove : MonoBehaviour
     {
         shoulderFollow.CameraSide = Mathf.MoveTowards(shoulderFollow.CameraSide,
             shoulderTarget, shoulderSwitchSpeed * Time.deltaTime);
+        isScoped = isAiming && playerShoot.weaponID == 2 ? true : false;
+
         moveCamera.Priority = isAiming ? 0 : 1;
-        aimCamera.Priority = isAiming ? 1 : -1;
+        aimCamera.Priority = isAiming && !isScoped ? 1 : -1;
         scopeCamera.Priority = isAiming && isScoped ? 1 : 0;
     }
 }
