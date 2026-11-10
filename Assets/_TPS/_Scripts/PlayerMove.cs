@@ -1,5 +1,6 @@
 using UnityEngine;
 using Unity.Cinemachine;
+using UnityEngine.Animations.Rigging;
 
 public class PlayerMove : MonoBehaviour
 {
@@ -29,6 +30,7 @@ public class PlayerMove : MonoBehaviour
     [SerializeField] private float xRotate, yRotate;
     public float mouseSensitivity = 0.25f;
     public float yMin, yMax;
+    public Rig playerRig;
 
     [Header("Player Physics")]
     public Vector3 playerVelocity;
@@ -44,6 +46,7 @@ public class PlayerMove : MonoBehaviour
     [SerializeField] private bool isGrounded;
     [SerializeField] private bool isRunning;
     [SerializeField] private bool isCrouching;
+    public bool rigSetupMode;
 
     private void Awake()
     {
@@ -130,8 +133,9 @@ public class PlayerMove : MonoBehaviour
     {
         shoulderFollow.CameraSide = Mathf.MoveTowards(shoulderFollow.CameraSide,
             shoulderTarget, shoulderSwitchSpeed * Time.deltaTime);
-        isScoped = isAiming && playerShoot.weaponID == 2 ? true : false;
+        isScoped = isAiming && playerShoot.weaponID == 1 ? true : false;
 
+        playerRig.weight = isAiming ? 1 : 0;
         moveCamera.Priority = isAiming ? 0 : 1;
         aimCamera.Priority = isAiming && !isScoped ? 1 : -1;
         scopeCamera.Priority = isAiming && isScoped ? 1 : 0;

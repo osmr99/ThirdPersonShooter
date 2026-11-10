@@ -1,5 +1,13 @@
 using UnityEngine;
+using UnityEngine.Animations.Rigging;
 using UnityEngine.UIElements;
+
+[System.Serializable]
+public class WeaponSlot
+{
+    public GameObject weaponModel;
+    public Transform leftHandIK;
+}
 
 public class PlayerShoot : MonoBehaviour
 {
@@ -8,7 +16,7 @@ public class PlayerShoot : MonoBehaviour
     [SerializeField] Animator anim;
 
     [Header("Set Weapon Type")]
-    public int weaponID = 1;
+    public int weaponID = 0;
 
     [Header("HUD Elements")]
     public GameObject aimPanel;
@@ -63,12 +71,22 @@ public class PlayerShoot : MonoBehaviour
     [Header("Shot Amount")]
     public int shotAmount = 7;
     public float randomAccuracy = 5;
+
+    [Header("Weapon Switching")]
+    public WeaponSlot[] _weapons;
+    public RigBuilder rigBuilder;
+    public TwoBoneIKConstraint leftHandConstraint;
     
     private void Awake()
     {
         tpsInput = new Tps_Inputs();
         playerMove = GetComponent<PlayerMove>();
         anim = GetComponent<Animator>();
+    }
+
+    private void Start()
+    {
+        EquipWeapon(weaponID);
     }
 
     private void OnEnable() => tpsInput.Enable();
@@ -84,11 +102,21 @@ public class PlayerShoot : MonoBehaviour
         else gunCoolDown = 0;
 
         if (tpsInput.Player.Weapon1.triggered)
-            weaponID = 1;
+        {
+            weaponID = 0;
+            EquipWeapon(weaponID);
+        }
         if (tpsInput.Player.Weapon2.triggered)
-            weaponID = 2;
+        {
+            weaponID = 1;
+            EquipWeapon(weaponID);
+        }
         if (tpsInput.Player.Weapon3.triggered)
-            weaponID = 3;
+        {
+            weaponID = 2;
+            EquipWeapon(weaponID);
+        }
+            
 
         Vector2 screenCenterPoint = new Vector2(Screen.width / 2, Screen.height / 2);
 
@@ -98,15 +126,15 @@ public class PlayerShoot : MonoBehaviour
         {
             switch(weaponID)
             {
-                case 1:
+                case 0:
                     gunCoolDown = pistolSpeed;
                     FirePistol();
                     break;
-                case 2:
+                case 1:
                     gunCoolDown = rifleSpeed;
                     FireRifle();
                     break;
-                case 3:
+                case 2:
                     gunCoolDown = shotSpeed;
                     FireShotgun();
                     break;
@@ -122,6 +150,20 @@ public class PlayerShoot : MonoBehaviour
             rifleSpawn.LookAt(rayCastHit.point);
             shotgunSpawn.LookAt(rayCastHit.point);
         }
+    }
+
+    void EquipWeapon(int id)
+    {
+        for(int i = 0; i < _weapons.Length; i++)
+        {
+            _weapons[i].weaponModel.SetActive(i == id);
+        }
+
+        var slot = _weapons[id];
+        var data = leftHandConstraint.data;
+        data.target = slot.leftHandIK;
+
+        rigBuilder.Build();
     }
 
     void FirePistol()
@@ -163,10 +205,10 @@ public class PlayerShoot : MonoBehaviour
         {
             Vector3 shotAngle = GetShotDirection();
             Rigidbody _trail;
-            _trail = Instantiate(bulletTrail, gunSpawnPoint.position,
-                gunSpawnPoint.rotation) as Rigidbody;
+            _trail = Instantiate(bulletTrail, shotgunSpawn.position,
+                shotgunSpawn.rotation) as Rigidbody;
             _trail.AddForce(shotAngle * 300, ForceMode.Impulse);
-            if (Physics.Raycast(gunSpawnPoint.position, shotAngle,
+            if (Physics.Raycast(shotgunSpawn.position, shotAngle,
                 out RaycastHit hit, pistolDistance))
             {
                 WeaponHit(hit);
@@ -193,6 +235,14 @@ public class PlayerShoot : MonoBehaviour
         {
             Instantiate(bulletDecal, hit.point, Quaternion.LookRotation(hit.normal));
             Instantiate(bulletImpact, hit.point, Quaternion.LookRotation(hit.normal));
+        }
+        if(hit.collider.tag == "Enemy")
+        {
+            ZombieHitZone zone = hit.collider.GetComponent<ZombieHitZone>();
+            if(zone != null)
+            {
+                zone.healthScript.TakeDamage(1);
+            }
         }
     }
 }
