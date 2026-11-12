@@ -1,6 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class _OmarScript : MonoBehaviour
 {
@@ -12,9 +13,12 @@ public class _OmarScript : MonoBehaviour
         if (Keyboard.current.qKey.wasPressedThisFrame)
             EditorApplication.isPaused = !EditorApplication.isPaused;
 
+        if (Keyboard.current.cKey.wasPressedThisFrame)
+            SceneManager.LoadScene(0);
+
         //if (Keyboard.current.leftAltKey.isPressed)
-            //Cursor.lockState = CursorLockMode.None;
+        //Cursor.lockState = CursorLockMode.None;
         //else
-            //Cursor.lockState = CursorLockMode.Locked;
+        //Cursor.lockState = CursorLockMode.Locked;
     }
 }

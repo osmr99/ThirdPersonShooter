@@ -76,6 +76,10 @@ public class PlayerShoot : MonoBehaviour
     public WeaponSlot[] _weapons;
     public RigBuilder rigBuilder;
     public TwoBoneIKConstraint leftHandConstraint;
+    public Rig rig;
+    public MultiAimConstraint bodyAim;
+    public Vector3 pistolOffset;
+    public Vector3 longGunOffset;
     
     private void Awake()
     {
@@ -97,6 +101,8 @@ public class PlayerShoot : MonoBehaviour
     {
         aimPanel.SetActive(playerMove.isAiming ? true : false);
         scopePanel.SetActive(playerMove.isAiming && playerMove.isScoped? true : false);
+
+        rig.weight = playerMove.isAiming ? 1 : 0;
 
         if (gunCoolDown > 0) gunCoolDown -= Time.deltaTime;
         else gunCoolDown = 0;
@@ -178,7 +184,7 @@ public class PlayerShoot : MonoBehaviour
         if(Physics.Raycast(pistolSpawn.position, pistolSpawn.forward, 
             out RaycastHit hit, pistolDistance))
         {
-            WeaponHit(hit);
+            WeaponHit(hit, (int)pistolHeadDamage, (int)pistolBodyDamage, (int)pistolLegDamage);
         }
     }
 
@@ -194,7 +200,7 @@ public class PlayerShoot : MonoBehaviour
         if (Physics.Raycast(rifleSpawn.position, rifleSpawn.forward,
             out RaycastHit hit, pistolDistance))
         {
-            WeaponHit(hit);
+            WeaponHit(hit, (int)rifleHeadDamage, (int)rifleBodyDamage, (int)riflelLegDamage);
         }
     }
 
@@ -211,7 +217,7 @@ public class PlayerShoot : MonoBehaviour
             if (Physics.Raycast(shotgunSpawn.position, shotAngle,
                 out RaycastHit hit, pistolDistance))
             {
-                WeaponHit(hit);
+                WeaponHit(hit, (int)shotHeadDamage, (int)shotBodyDamage, (int)shotLegDamage);
             }
         }
     }
@@ -227,7 +233,7 @@ public class PlayerShoot : MonoBehaviour
         Vector3 _direction = targetPos - gunSpawnPoint.position;
         return _direction.normalized;
     }
-    void WeaponHit(RaycastHit hit)
+    void WeaponHit(RaycastHit hit, int headDmg, int bodyDmg, int legDmg)
     {
         Debug.Log("You just hit " + hit.collider.name);
 
@@ -241,8 +247,21 @@ public class PlayerShoot : MonoBehaviour
             ZombieHitZone zone = hit.collider.GetComponent<ZombieHitZone>();
             if(zone != null)
             {
-                zone.healthScript.TakeDamage(1);
+                zone.ZombieShoot(headDmg, bodyDmg, legDmg);
             }
         }
+    }
+
+    private void LateUpdate()
+    {
+        Vector3 _offset = bodyAim.data.offset;
+        if(playerMove.isAiming)
+        {
+            if (weaponID == 0)
+                _offset = pistolOffset;
+            else
+                _offset = longGunOffset;
+        }
+        bodyAim.data.offset = _offset;
     }
 }
