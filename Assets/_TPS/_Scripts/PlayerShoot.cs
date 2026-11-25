@@ -13,6 +13,7 @@ public class PlayerShoot : MonoBehaviour
 {
     Tps_Inputs tpsInput;
     PlayerMove playerMove;
+    PlayerStats playerStats;
     [SerializeField] Animator anim;
 
     [Header("Set Weapon Type")]
@@ -39,19 +40,19 @@ public class PlayerShoot : MonoBehaviour
 
     [Header("Damage")]
     // Pistol Damage
-    public float pistolHeadDamage = 30;
-    public float pistolBodyDamage = 10;
-    public float pistolLegDamage = 10;
+    public float pistolHeadDamage = 32;
+    public float pistolBodyDamage = 25;
+    public float pistolLegDamage = 15;
 
     // Shotgun Damage
-    public float shotHeadDamage = 30;
-    public float shotBodyDamage = 10;
-    public float shotLegDamage = 10;
+    public float shotHeadDamage = 35;
+    public float shotBodyDamage = 28;
+    public float shotLegDamage = 24;
 
     // Rifle Damage
-    public float rifleHeadDamage = 30;
-    public float rifleBodyDamage = 10;
-    public float riflelLegDamage = 10;
+    public float rifleHeadDamage = 100;
+    public float rifleBodyDamage = 50;
+    public float riflelLegDamage = 35;
 
     [Header("Layer Masks")]
     public LayerMask aimCollisionMask = new LayerMask();
@@ -80,22 +81,31 @@ public class PlayerShoot : MonoBehaviour
     public MultiAimConstraint bodyAim;
     public Vector3 pistolOffset;
     public Vector3 longGunOffset;
+
+    [Header("Found Guns")]
+    public bool hasRifle;
+    public bool hasShotGun;
+
+    [Header("Ammo")]
+    public int[] weaponsAmmoMax = { 12, 3, 6 };
+    public int[] weaponsAmmoCurrent = { 12, 3, 6 };
     
     private void Awake()
     {
         tpsInput = new Tps_Inputs();
         playerMove = GetComponent<PlayerMove>();
+        playerStats = GetComponent<PlayerStats>();
         anim = GetComponent<Animator>();
     }
 
     private void Start()
     {
-        EquipWeapon(weaponID);
+        EquipWeapon(0);
     }
 
-    private void OnEnable() => tpsInput.Enable();
+    public void OnEnable() => tpsInput.Enable();
 
-    private void OnDisable() => tpsInput.Disable();
+    public void OnDisable() => tpsInput.Disable();
 
     private void Update()
     {
@@ -112,12 +122,12 @@ public class PlayerShoot : MonoBehaviour
             weaponID = 0;
             EquipWeapon(weaponID);
         }
-        if (tpsInput.Player.Weapon2.triggered)
+        if (tpsInput.Player.Weapon2.triggered && hasRifle)
         {
             weaponID = 1;
             EquipWeapon(weaponID);
         }
-        if (tpsInput.Player.Weapon3.triggered)
+        if (tpsInput.Player.Weapon3.triggered && hasShotGun)
         {
             weaponID = 2;
             EquipWeapon(weaponID);
@@ -146,6 +156,16 @@ public class PlayerShoot : MonoBehaviour
                     break;
             }
         }
+
+        if(tpsInput.Player.Reload.triggered)
+        {
+            if(weaponsAmmoCurrent[weaponID] != weaponsAmmoMax[weaponID])
+            {
+                SoundManager.Instance.PlaySound2D("WeaponReload");
+                weaponsAmmoCurrent[weaponID] = weaponsAmmoMax[weaponID];
+                playerStats.AmmoUpdate();
+            }
+        }
             
 
         if(Physics.Raycast(ray, out RaycastHit rayCastHit, 999f, aimCollisionMask ))
@@ -160,7 +180,9 @@ public class PlayerShoot : MonoBehaviour
 
     void EquipWeapon(int id)
     {
-        for(int i = 0; i < _weapons.Length; i++)
+        SoundManager.Instance.PlaySound2D("WeaponEquip");
+        playerStats.AmmoUpdate();
+        for (int i = 0; i < _weapons.Length; i++)
         {
             _weapons[i].weaponModel.SetActive(i == id);
         }
@@ -174,51 +196,81 @@ public class PlayerShoot : MonoBehaviour
 
     void FirePistol()
     {
-        SoundManager.Instance.PlaySound2D("PistolFire");
-        anim.SetTrigger("Pistol");
-        Rigidbody _trail;
-        _trail = Instantiate(bulletTrail, pistolSpawn.position,
-            pistolSpawn.rotation) as Rigidbody;
-        _trail.AddForce(pistolSpawn.forward * 300, ForceMode.Impulse);
-
-        if(Physics.Raycast(pistolSpawn.position, pistolSpawn.forward, 
-            out RaycastHit hit, pistolDistance))
+        if (weaponsAmmoCurrent[0] > 0)
         {
-            WeaponHit(hit, (int)pistolHeadDamage, (int)pistolBodyDamage, (int)pistolLegDamage);
+            SoundManager.Instance.PlaySound2D("PistolFire");
+            weaponsAmmoCurrent[0]--;
+            playerStats.AmmoUpdate();
+
+            anim.SetTrigger("Pistol");
+            Rigidbody _trail;
+            _trail = Instantiate(bulletTrail, pistolSpawn.position,
+                pistolSpawn.rotation) as Rigidbody;
+            _trail.AddForce(pistolSpawn.forward * 300, ForceMode.Impulse);
+
+            if (Physics.Raycast(pistolSpawn.position, pistolSpawn.forward,
+                out RaycastHit hit, pistolDistance))
+            {
+                WeaponHit(hit, (int)pistolHeadDamage, (int)pistolBodyDamage, (int)pistolLegDamage);
+            }
         }
+        else
+        {
+            playerStats.currentDuration = playerStats.textDuration;
+        }
+
     }
 
     void FireRifle()
     {
-        SoundManager.Instance.PlaySound2D("Rifle");
-        
-        Rigidbody _trail;
-        _trail = Instantiate(bulletTrail, rifleSpawn.position,
-            rifleSpawn.rotation) as Rigidbody;
-        _trail.AddForce(rifleSpawn.forward * 300, ForceMode.Impulse);
-
-        if (Physics.Raycast(rifleSpawn.position, rifleSpawn.forward,
-            out RaycastHit hit, pistolDistance))
+        if (weaponsAmmoCurrent[1] > 0)
         {
-            WeaponHit(hit, (int)rifleHeadDamage, (int)rifleBodyDamage, (int)riflelLegDamage);
+            SoundManager.Instance.PlaySound2D("Rifle");
+            weaponsAmmoCurrent[1]--;
+            playerStats.AmmoUpdate();
+
+            Rigidbody _trail;
+            _trail = Instantiate(bulletTrail, rifleSpawn.position,
+                rifleSpawn.rotation) as Rigidbody;
+            _trail.AddForce(rifleSpawn.forward * 300, ForceMode.Impulse);
+
+            if (Physics.Raycast(rifleSpawn.position, rifleSpawn.forward,
+                out RaycastHit hit, pistolDistance))
+            {
+                WeaponHit(hit, (int)rifleHeadDamage, (int)rifleBodyDamage, (int)riflelLegDamage);
+            }
+        }
+        else
+        {
+            playerStats.currentDuration = playerStats.textDuration;
         }
     }
 
     void FireShotgun()
     {
-        SoundManager.Instance.PlaySound2D("ShotGun");
-        for(int i = 0; i < shotAmount; i++)
+        if (weaponsAmmoCurrent[2] > 0)
         {
-            Vector3 shotAngle = GetShotDirection();
-            Rigidbody _trail;
-            _trail = Instantiate(bulletTrail, shotgunSpawn.position,
-                shotgunSpawn.rotation) as Rigidbody;
-            _trail.AddForce(shotAngle * 300, ForceMode.Impulse);
-            if (Physics.Raycast(shotgunSpawn.position, shotAngle,
-                out RaycastHit hit, pistolDistance))
+            SoundManager.Instance.PlaySound2D("ShotGun");
+            weaponsAmmoCurrent[2]--;
+            playerStats.AmmoUpdate();
+
+            for (int i = 0; i < shotAmount; i++)
             {
-                WeaponHit(hit, (int)shotHeadDamage, (int)shotBodyDamage, (int)shotLegDamage);
+                Vector3 shotAngle = GetShotDirection();
+                Rigidbody _trail;
+                _trail = Instantiate(bulletTrail, shotgunSpawn.position,
+                    shotgunSpawn.rotation) as Rigidbody;
+                _trail.AddForce(shotAngle * 300, ForceMode.Impulse);
+                if (Physics.Raycast(shotgunSpawn.position, shotAngle,
+                    out RaycastHit hit, pistolDistance))
+                {
+                    WeaponHit(hit, (int)shotHeadDamage, (int)shotBodyDamage, (int)shotLegDamage);
+                }
             }
+        }
+        else
+        {
+            playerStats.currentDuration = playerStats.textDuration;
         }
     }
 
@@ -235,7 +287,7 @@ public class PlayerShoot : MonoBehaviour
     }
     void WeaponHit(RaycastHit hit, int headDmg, int bodyDmg, int legDmg)
     {
-        Debug.Log("You just hit " + hit.collider.name);
+        //Debug.Log("You just hit " + hit.collider.name);
 
         if(hit.transform.gameObject.tag == "ground")
         {
@@ -263,5 +315,19 @@ public class PlayerShoot : MonoBehaviour
                 _offset = longGunOffset;
         }
         bodyAim.data.offset = _offset;
+    }
+
+    public void FoundRifle()
+    {
+        hasRifle = true;
+        weaponID = 1;
+        EquipWeapon(weaponID);
+    }
+
+    public void FoundShotGun()
+    {
+        hasShotGun = true;
+        weaponID = 2;
+        EquipWeapon(weaponID);
     }
 }

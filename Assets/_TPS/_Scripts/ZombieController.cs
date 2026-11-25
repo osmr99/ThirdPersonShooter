@@ -6,6 +6,7 @@ public class ZombieController : MonoBehaviour
 {
     [SerializeField] NavMeshAgent agent;
     [SerializeField] ZombieHealthScript healthScript;
+    PlayerStats playerStats;
 
     [Header("Target")]
     private Transform _player;
@@ -21,6 +22,7 @@ public class ZombieController : MonoBehaviour
     private void Awake()
     {
         _player = GameObject.FindGameObjectWithTag("Player").transform;
+        playerStats = FindFirstObjectByType<PlayerStats>();
 
     }
 
@@ -38,6 +40,11 @@ public class ZombieController : MonoBehaviour
         float _distance = Vector3.Distance(transform.position, _player.position);
         if (_distance < stopDistance)
         {
+            if (_distance < stopDistance - 1 && playerStats.currentInv <= 0)
+            {
+                playerStats.HealthUpdate(3, false);
+                playerStats.currentInv = playerStats.invTime;
+            }
             agent.isStopped = true;
         }
         else

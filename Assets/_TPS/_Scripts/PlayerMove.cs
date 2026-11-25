@@ -46,6 +46,7 @@ public class PlayerMove : MonoBehaviour
     [SerializeField] private bool isGrounded;
     [SerializeField] private bool isRunning;
     [SerializeField] private bool isCrouching;
+    public bool canUncrouch;
     public bool rigSetupMode;
 
     private void Awake()
@@ -65,10 +66,11 @@ public class PlayerMove : MonoBehaviour
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+        canUncrouch = true;
     }
 
-    private void OnEnable() => tpsInputs.Enable();
-    private void OnDisable() => tpsInputs.Disable();
+    public void OnEnable() => tpsInputs.Enable();
+    public void OnDisable() => tpsInputs.Disable();
 
     private void Update()
     {
@@ -76,7 +78,7 @@ public class PlayerMove : MonoBehaviour
 
         isRunning = tpsInputs.Player.Run.IsPressed();
 
-        if (tpsInputs.Player.Crouch.triggered)
+        if (tpsInputs.Player.Crouch.triggered && canUncrouch)
             isCrouching = !isCrouching;
 
         isAiming = tpsInputs.Player.Aim.IsPressed();
@@ -86,6 +88,7 @@ public class PlayerMove : MonoBehaviour
         HandleInput();
         HandleMovement();
         HandleAiming();
+        HandleCrouching();
     }
 
     private void LateUpdate()
@@ -139,5 +142,13 @@ public class PlayerMove : MonoBehaviour
         moveCamera.Priority = isAiming ? 0 : 1;
         aimCamera.Priority = isAiming && !isScoped ? 1 : -1;
         scopeCamera.Priority = isAiming && isScoped ? 1 : 0;
+    }
+
+    void HandleCrouching()
+    {
+        if (isCrouching)
+            cc.height = 1;
+        else
+            cc.height = 1.8f;
     }
 }

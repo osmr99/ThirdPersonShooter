@@ -5,6 +5,7 @@ public class ZombieHealthScript : MonoBehaviour
     [Header("Zombie Health Amount")]
     public int zombieHealth = 10;
     [SerializeField] Animator _anim;
+    [SerializeField] GameObject goalTrigger;
 
     [Header("States")]
     public bool isStunned;
@@ -41,6 +42,10 @@ public class ZombieHealthScript : MonoBehaviour
         {
             isDead = true;
             _anim.SetTrigger("DeathGround");
+
+            if (gameObject.name == "ZombieBoss")
+                goalTrigger.SetActive(true);
+            Destroy(gameObject, 3f);
         }
     }
 }
